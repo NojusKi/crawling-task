@@ -26,17 +26,32 @@ def heading_virs(a, section): # tekstas virs nuorodos, artimiausias pirmas , to 
         yield s.strip()
         if section is None and re.match(r"(19|20)\d\d\s*(m\b|metų)", s.strip()):
             return
-        
+
+def rast_metus(pavadinimas, label, headings): #egz metai
+    if re.fullmatch(r"(19|20)\d\d", pavadinimas):
+        return int(pavadinimas)
+    if pavadinimas: # kitokie skyriai
+        return max(map(int, re.findall(r"(?:19|20)\d\d", label)), default=None)
+    for h in headings: #psl be skyriu
+        m = re.match(r"((?:19|20)\d\d)\s*(?:m\b|metu)", fold(h))
+        if m:
+            return int(m.group(1))
+    return None
+
+       
 def skaityt_kontekst(a, url): # surenka viska kas apima PDF nuoroda i viena zodyna
     link_text= a.get_text(" ", strip=True)
     section = a.find_parent(class_="panel")
+    pavadinimas = section.select_one(".panel-heading").get_text(strip=True) if section is not None else ""
     ctx = {
+        "section": pavadinimas,
         "link_text": link_text,
         "label": link_text if ar_informatyvus(link_text) else tekstas_pries(a), # jei nuoroda tik pdf imam teksta pries ja
         "headings": list(heading_virs(a, section)),
         "file_name": re.sub(r"[_\-.]+", " ", unquote(urlparse(url).path.rsplit("/",1)[-1])),
         "in_table": False, "row": "", "column": "", "title": "", "in_subject_column": False,
     }
+    ctx["year"] = rast_metus(pavadinimas, ctx["label"], ctx["headings"])
     td= a.find_parent("td")
     if td is not None: # nuorod lenteleje, randama eil ir stulp
         ctx["in_table"] = True
