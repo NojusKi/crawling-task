@@ -1,0 +1,1 @@
+""" NŠA egz užduočių ir vertinimo informacijos surinkimas iš pdf"""
