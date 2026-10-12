@@ -10,9 +10,11 @@ Programa perskaito 4 NŠA puslapius , atsiunčia VBE ir PUPP užduočių PDF bei
 ** paleidimas
 paleisti programa reikia python ir bibliotekų
 Bibliotekoms įrašyti į terminala reikia parašyti:
+
 pip install -r requirements.txt
 
 Ir tuomet paleisti pačią programą terminale:
+
 python crawl.py
 
 
