@@ -1,12 +1,27 @@
 import re
 from urllib.parse import urlparse, unquote
 from .metadata import fold
+from bs4.element import NavigableString
 
 INLINE_TAGS = {"strong", "b", "em", "i", "u", "span", "sup", "sub"} # html zymejimai eiluteje, kurie neturi sukelti naujos eilutes
 
 def ar_informatyvus(tekstas):
     be_pdf = re.sub(r"\b(pdf|priedas|priedai|a3|a4)\b", " ", fold(tekstas))
     return bool(re.search(r"[a-z]{3,}", be_pdf))
+
+def gretima_nuoroda(a, kryptis):
+    s = getattr(a, kryptis)
+    while isinstance(s, NavigableString) and not s.strip():
+        s = getattr(s, kryptis)
+    return s if getattr(s, "name", None) == "a" and s.get("href") else None
+
+def matomas_tekstas (a):
+    dalys = [a.get_text(" ", strip=True)]
+    pries = gretima_nuoroda(a, "previous_sibling")
+    while pries is not None:
+        dalys.insert(0, pries.get_text(" ", strip=True))
+        pries = gretima_nuoroda(pries, "previous_sibling")
+    return " ".join(dalys)
 
 def tekstas_pries(a):
     dalys = []
@@ -40,7 +55,7 @@ def rast_metus(pavadinimas, label, headings): #egz metai
 
        
 def skaityt_kontekst(a, url): # surenka viska kas apima PDF nuoroda i viena zodyna
-    link_text= a.get_text(" ", strip=True)
+    link_text= matomas_tekstas (a)
     section = a.find_parent(class_="panel")
     pavadinimas = section.select_one(".panel-heading").get_text(strip=True) if section is not None else ""
     ctx = {

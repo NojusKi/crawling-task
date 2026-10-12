@@ -11,5 +11,6 @@ PAGES = [
 
 OUT_DIR = Path("duomenys")
 PDF_DIR = OUT_DIR / "pdf_failai"
-
+INDEX_FILE = OUT_DIR / "index.json"
+LOG_FILE = OUT_DIR / "crawl.log"
 OUT_OF_SCOPE_HOST = "etestavimas.lt"
